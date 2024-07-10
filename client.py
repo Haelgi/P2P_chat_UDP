@@ -20,7 +20,7 @@ class Client:
             msg = input(f'you: ')
             self.s.send(msg.encode('ascii'))
     
-    def listen(self):
+    def listen(self, s: socket.socket):
         while True:
             msg = self.s.recv(1024)
             print('\r\r' + msg.decode('ascii') + '\n' + f'you: ', end='')
