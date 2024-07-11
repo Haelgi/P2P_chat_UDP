@@ -1,38 +1,44 @@
 import socket
 
-class Server:
-    def __init__(self):
-        self.host = '127.0.0.1'
-        self.port = 3000
+UDP_MAX_SIZE = 65535
 
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.s.bind((self.host, self.port))
-        print(f'Listening at {self.host}:{self.port}')
+def listen(host: str = '127.0.0.1', port: int = 3000):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-        self.conn_list=[]
-        self.run()
+    s.bind((host, port))
+    print(f'Listening at {host}:{port}')
 
-    def run(self):
-        while True:
-            msg, addr = self.s.recvfrom(1024)
+    members = []
+    while True:
+        msg, addr = s.recvfrom(UDP_MAX_SIZE)
 
-            if addr not in self.conn_list:
-                self.conn_list.append(addr)
-            
-            if not msg:
+        if addr not in members:
+            members.append(addr)
+        
+        if not msg:
+            continue
+
+        client_id = addr[1]
+        msg_text = msg.decode('utf-8')
+        if msg_text == '__join':
+            print(f'Client {client_id} joined chat')
+            continue
+
+        message_template = '{}__{}'
+        if msg_text == '__get':
+            print(f'Client {client_id} requested members')
+            active_members = [f'client{m[1]}' for m in members if m != addr]
+            members_msg = ';'.join(active_members)
+            s.sendto(message_template.format('members', members_msg).encode('utf-8'), addr)
+            continue
+
+        msg = f'client{client_id}: {msg.decode("utf-8")}'
+        for member in members:
+            if member == addr:
                 continue
 
-            if msg.decode('utf-8') == '__join':
-                print(f'Client {addr[1]} joined chat')
-                continue
+            s.sendto(msg.encode('utf-8'), member)
 
-            msg = f'client{addr[1]}: {msg.decode('utf-8')}'
-
-            for conn in self.conn_list:
-                if conn == addr:
-                    continue
-
-                self.s.sendto(msg.encode('utf-8'), conn)
 
 if __name__ == '__main__':
-    Server()
+    listen()
