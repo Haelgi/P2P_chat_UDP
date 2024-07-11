@@ -22,17 +22,17 @@ class Server:
             if not msg:
                 continue
 
-            if msg.decode('ascii') == '__join':
+            if msg.decode('utf-8') == '__join':
                 print(f'Client {addr[1]} joined chat')
                 continue
 
-            msg = f'client{addr[1]}: {msg.decode('ascii')}'
+            msg = f'client{addr[1]}: {msg.decode('utf-8')}'
 
             for conn in self.conn_list:
                 if conn == addr:
                     continue
 
-                self.s.sendto(msg.encode('ascii'), conn)
+                self.s.sendto(msg.encode('utf-8'), conn)
 
 if __name__ == '__main__':
     Server()

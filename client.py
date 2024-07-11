@@ -12,18 +12,18 @@ class Client:
 
         threading.Thread(target=self.listen, args=(self.s,), daemon=True).start()
 
-        self.s.send('__join'.encode('ascii'))
+        self.s.send('__join'.encode('utf-8'))
         self.run()
 
     def run(self):
         while True:
             msg = input(f'you: ')
-            self.s.send(msg.encode('ascii'))
+            self.s.send(msg.encode('utf-8'))
     
     def listen(self, s: socket.socket):
         while True:
             msg = self.s.recv(1024)
-            print('\r\r' + msg.decode('ascii') + '\n' + f'you: ', end='')
+            print('\r\r' + msg.decode('utf-8') + '\n' + f'you: ', end='')
 
 if __name__ == '__main__':
     os.system('cls')
